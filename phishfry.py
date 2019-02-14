@@ -2,7 +2,7 @@
 import argparse
 import logging
 import os.path
-from remediation import RemediationAccount
+import remediation
 import sys
 
 # global vars
@@ -15,7 +15,7 @@ def load_accounts():
             line.strip()
             if line != "" and not line.startswith("#"):
                 server, username, password = line.split(":", 2)
-                accounts.append(RemediationAccount(server, username, password))
+                accounts.append(remediation.Account(server, username, password))
 
 # delete action
 def delete():

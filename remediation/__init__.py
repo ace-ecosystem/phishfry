@@ -1,1 +1,1 @@
-from .remediation import RemediationAccount
+from .remediation import Account

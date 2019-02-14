@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-from exchangelib import Account, Configuration, Credentials, IMPERSONATION
+from exchangelib import Account as ExchangeAccount, Configuration, Credentials, IMPERSONATION
 from exchangelib.ewsdatetime import EWSTimeZone
 from exchangelib.errors import ErrorItemNotFound, ErrorNonExistentMailbox, ErrorNameResolutionNoResults
 from exchangelib.util import PrettyXmlHandler
 
-class RemediationAccount(Account):
+class Account(ExchangeAccount):
     def __init__(self, server, username, password):
         self.username = username
         credentials = Credentials(username=username, password=password)
         self.config = Configuration(server=server, credentials=credentials)
         self.timezone = EWSTimeZone.timezone("UTC")
-        Account.__init__(self, primary_smtp_address=username, config=self.config, access_type=IMPERSONATION, default_timezone=self.timezone)
+        ExchangeAccount.__init__(self, primary_smtp_address=username, config=self.config, access_type=IMPERSONATION, default_timezone=self.timezone)
 
     # returns account for impersonated username
     def impersonate(self, address):
-        return Account(primary_smtp_address=address, config=self.config, access_type=IMPERSONATION, default_timezone=self.timezone)
+        return ExchangeAccount(primary_smtp_address=address, config=self.config, access_type=IMPERSONATION, default_timezone=self.timezone)
 
     # resolves username into {address:mailbox} dictionary
     def resolve_name(self, address, resolved_addresses=None):
