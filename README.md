@@ -19,7 +19,7 @@ Display help command line help information
 
 ## Library usage
 ```python
-from phishfry import RemediationAccount
+from remediation import RemediationAccount
 
 account = RemediationAccount("outlook.office365.com", "admin@example.com", "password123")
 for address in account.resolve_name("user@example.com"):
