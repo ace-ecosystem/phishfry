@@ -25,7 +25,7 @@ def delete():
 
         # delete message from all recipients mailboxes
         for recipient in recipients:
-            print("deleting {} from {}".format(args.message-id, recipient))
+            print("deleting {} from {}".format(args.message_id, recipient))
             try:
                 account.delete(recipient, args.message_id)
                 print("message deleted")
