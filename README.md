@@ -10,7 +10,7 @@ cd phishfry
 ```
 
 Add credentials for one or more exchange accounts with impersonation rights to the credentials file.
-Example credentials file:
+###### Example credentials file:
 ```
 # exchange_server:admin_email_address:admin_email_password
 outlook.office365.com:admin@example.com:password
