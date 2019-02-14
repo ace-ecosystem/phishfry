@@ -1,16 +1,14 @@
-# PhishFry
 PhishFry is a python library and command line tool for removing and restoring emails in exchange and office365.
 
-## Setup
-### Install exchangelib
-PhishFry requires the exchangelib python package. Run the following commands to install exchangelib:
+### Setup
+#### Install exchangelib
 ```bash
 git clone git@github.com:ecederstrand/exchangelib.git
 cd exchangelib
 sudo python3 setup.py install
 ```
 
-### Configure Credentials
+#### Configure Credentials
 Add your exchange account credentials to the credentials file with the following format:
 ```
 exchange_server:admin_email_address:admin_email_password
@@ -21,7 +19,7 @@ outlook.office365.com:admin@example.com:password
 ```
 NOTE: Your exchange account must have impersonation rights in exchange to perform delete and restore operations.
 
-## Command line examples
+### Command line examples
 #### Delete a message from a maiblox
 ```bash
 ./phishfry.py delete test@example.com "<message_id>"
@@ -37,7 +35,7 @@ NOTE: Your exchange account must have impersonation rights in exchange to perfor
 ./phishfry.py -h
 ```
 
-## Library usage
+### Library usage
 ```python
 import remediation
 
