@@ -1,3 +1,4 @@
+from .errors import MessageNotFound
 from .folder import Folder, DistinguishedFolder
 from lxml import etree
 from .namespaces import ENS, MNS, SNS, TNS, NSMAP
@@ -47,34 +48,40 @@ class Mailbox():
         # find all messages with message_id
         messages = self.messages.Find(message_id)
 
-        if len(messages) > 0:
-            # create delete request
-            delete = etree.Element("{%s}DeleteItem" % MNS, DeleteType="SoftDelete")
+        # throw exception if message not found
+        if len(messages) == 0:
+            raise MessageNotFound("Message nott found.")
 
-            # add all messages to delete request
-            items = etree.SubElement(delete, "{%s}ItemIds" % MNS)
-            for message in messages:
-                items.append(message.xml)
+        # create delete request
+        delete = etree.Element("{%s}DeleteItem" % MNS, DeleteType="SoftDelete")
 
-            # send the request
-            response = self.session.SendRequest(delete, impersonate=self.address)
+        # add all messages to delete request
+        items = etree.SubElement(delete, "{%s}ItemIds" % MNS)
+        for message in messages:
+            items.append(message.xml)
+
+        # send the request
+        response = self.session.SendRequest(delete, impersonate=self.address)
 
     def Restore(self, message_id):
         # find all messages with message_id
         messages = self.deleted_messages.Find(message_id)
 
-        if len(messages) > 0:
-            # create restore request
-            restore = etree.Element("{%s}MoveItem" % MNS)
+        # throw exception if message not found
+        if len(messages) == 0:
+            raise MessageNotFound("Message not found.")
 
-            # add restore destination
-            to_folder = etree.SubElement(restore, "{%s}ToFolderId" % MNS)
-            to_folder.append(DistinguishedFolder(self, "inbox").xml)
+        # create restore request
+        restore = etree.Element("{%s}MoveItem" % MNS)
 
-            # add all messages to restore request
-            items = etree.SubElement(restore, "{%s}ItemIds" % MNS)
-            for message in messages:
-                items.append(message.xml)
+        # add restore destination
+        to_folder = etree.SubElement(restore, "{%s}ToFolderId" % MNS)
+        to_folder.append(DistinguishedFolder(self, "inbox").xml)
 
-            # send the request
-            response = self.session.SendRequest(restore, impersonate=self.address)
+        # add all messages to restore request
+        items = etree.SubElement(restore, "{%s}ItemIds" % MNS)
+        for message in messages:
+            items.append(message.xml)
+
+        # send the request
+        response = self.session.SendRequest(restore, impersonate=self.address)

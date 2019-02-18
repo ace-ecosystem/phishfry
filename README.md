@@ -44,16 +44,10 @@ session = EWS.Session("admin@example1.com", "123456")
 mailboxes = session.Resolve("user@example.com")
 
 # delete a message from all mailboxes
-for address in mailboxes:
-	try:
-		mailboxes[address].Delete("<message_id>")
-	except Exception as e:
-		print(e)
+for mailbox in mailboxes:
+	mailbox.Delete("<message_id>")
 
 # restore a message to all mailboxes
-for address in mailboxes:
-	try:
-		session.Restore("<message_id>")
-	except Exception as e:
-		print(e)
+for mailbox in mailboxes:
+	mailbox.Restore("<message_id>")
 ```
