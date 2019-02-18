@@ -1,63 +1,77 @@
 #!/usr/bin/env python3
 import argparse
+from configparser import ConfigParser
 import logging
 import os.path
-import remediation
-import sys
+import EWS
 
 # global vars
-accounts = []
+sessions = []
+config = ConfigParser()
 
-# load accounts from config file
+def GetConfigVar(section, key, default=None):
+    if section in config and key in config[section] and config[section][key]:
+        return config[section][key]
+    elif default is not None:
+        return default
+    raise Exception("Missing required config variable config[{}][{}]".format(section, key))
+
+
+# create ews sessions from each account in the config file
 def load_accounts():
-    with open(args.config, "r") as fp:
-        for line in fp:
-            line.strip()
-            if line != "" and not line.startswith("#"):
-                server, username, password = line.split(":", 2)
-                accounts.append(remediation.Account(server, username, password))
+    config.read(args.config)
+    timezone = GetConfigVar("DEFAULT", "timezone", default="UTC")
+
+    for section in config.sections():
+        server = GetConfigVar(section, "server", default="outlook.office365.com")
+        version = GetConfigVar(section, "version", default="Exchange2016")
+        user = GetConfigVar(section, "user")
+        password = GetConfigVar(section, "pass")
+        sessions.append(EWS.Session(user, password, server=server, version=version, timezone=timezone))
 
 # delete action
 def delete():
-    for account in accounts:
-        # find all recipients
-        recipients = account.resolve_name(args.recipient)
+    for session in sessions:
+        # find all mailboxes the recipient address delivers to
+        mailboxes = session.Resolve(args.recipient)
 
-        # delete message from all recipients mailboxes
-        for recipient in recipients:
-            print("deleting {} from {}".format(args.message_id, recipient))
+        # delete message from all mailboxes
+        for address in mailboxes:
+            print("deleting {} from {}".format(args.message_id, address))
             try:
-                account.delete(recipient, args.message_id)
+                mailboxes[address].Delete(args.message_id)
                 print("message deleted")
             except Exception as e:
                 print(e)
 
 # restore action
 def restore():
-    for account in accounts:
-        # find all recipients
-        recipients = account.resolve_name(args.recipient)
+    for session in sessions:
+        # find all mailboxes the recipient address delivers to
+        mailboxes = session.Resolve(args.recipient)
 
-        # restore message to all recipients mailboxes
-        for recipient in recipients:
-            print("restoring {} for {}".format(args.message_id, recipient))
+        # restore message to all mailboxes
+        for address in mailboxes:
+            print("restore {} to {}".format(args.message_id, address))
             try:
-                account.restore(recipient, args.message_id)
+                mailboxes[address].Restore(args.message_id)
                 print("message restored")
             except Exception as e:
                 print(e)
 
 # resolve action
 def resolve():
-    for account in accounts:
-        # find all recipients
-        recipients = account.resolve_name(args.recipient)
-        for recipient in recipients:
-            print(recipients[recipient])
+    for session in sessions:
+        # find all mailboxes the recipient address delivers to
+        mailboxes = session.Resolve(args.recipient)
+
+        # print all resolved addresses
+        for address in mailboxes:
+            print(address)
 
 # global args
 parser = argparse.ArgumentParser()
-default_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "credentials")
+default_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.ini")
 parser.add_argument("-c", dest="config", nargs="?", default=default_config_path, help="specify config path")
 parser.add_argument("-v", dest="verbose", help="display verbose output", action="store_true")
 subparsers = parser.add_subparsers(dest="action")
@@ -86,7 +100,9 @@ args = parser.parse_args()
 if args.action:
     # show ews debug messages
     if args.verbose:
-        logging.basicConfig(level=logging.DEBUG, handlers=[PrettyXmlHandler()])
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     # load accounts
     load_accounts()

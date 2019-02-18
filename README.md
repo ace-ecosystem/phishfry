@@ -9,11 +9,16 @@ cd phishfry
 ./setup.sh
 ```
 
-Add credentials for one or more exchange accounts with impersonation rights to the credentials file.
-###### Example credentials file:
+Add credentials for one or more exchange accounts with impersonation rights to the config.ini file.
+###### Example config.ini file:
 ```
-# exchange_server:admin_email_address:admin_email_password
-outlook.office365.com:admin@example.com:password
+[account1]
+user=admin@example1.com
+pass=123456
+
+[account2]
+user=admin@example2.com
+pass=123456
 ```
 
 ## Command Line Tool
@@ -30,25 +35,25 @@ outlook.office365.com:admin@example.com:password
 
 ## Library
 ```python
-import remediation
+import EWS
 
-# instantiate a remediation account
-account = remediation.Account("outlook.office365.com", "admin@example.com", "password123")
+# create an EWS session
+session = EWS.Session("admin@example1.com", "123456")
 
-# resolve a user address into all recipient addresses
-addresses = account.resolve_name("user@example.com")
+# resolve all mailboxes that an address delivers to
+mailboxes = session.Resolve("user@example.com")
 
-# delete a message from all recipients' mailboxes
-for address in addresses:
+# delete a message from all mailboxes
+for address in mailboxes:
 	try:
-		account.delete(address, "<message_id>")
+		mailboxes[address].Delete("<message_id>")
 	except Exception as e:
 		print(e)
 
-# restore a message to all recipients' mailboxes
-for address in addresses:
+# restore a message to all mailboxes
+for address in mailboxes:
 	try:
-		account.restore(address, "<message_id>")
+		session.Restore("<message_id>")
 	except Exception as e:
 		print(e)
 ```
