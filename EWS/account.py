@@ -8,7 +8,7 @@ import requests
 
 log = logging.getLogger(__name__)
 
-class Session():
+class Account():
     def __init__(self, user, password, server="outlook.office365.com", version="Exchange2016", timezone="UTC"):
         self.version = version
         self.session = requests.Session()
@@ -67,45 +67,8 @@ class Session():
         # return the reponse xml
         return response_xml
 
-    def ExpandMailbox(self, mailbox, expanded_addresses=None):
-        if mailbox.mailbox_type == "PublicDL" or mailbox.mailbox_type == "GroupMailbox":
-            # do not expand the same address twice
-            if expanded_addresses is None:
-                expanded_addresses = {}
-            if mailbox.address in expanded_addresses:
-                return {}
-            expanded_addresses[mailbox.address] = True
-
-            # create expand dl request
-            expand_dl = etree.Element("{%s}ExpandDL" % MNS)
-            m_elem = etree.SubElement(expand_dl, "{%s}Mailbox" % MNS)
-            address = etree.SubElement(m_elem, "{%s}EmailAddress" % TNS)
-            address.text = mailbox.address
-
-            # send the request
-            response = self.SendRequest(expand_dl)
-            
-            # recursively expand distribution lists
-            if mailbox.mailbox_type == "PublicDL":
-                members = {}
-                for mailbox_elem in response.findall(".//{%s}Mailbox" % TNS):
-                    member = Mailbox(self, mailbox_elem)
-                    members.update(self.ExpandMailbox(member, expanded_addresses=expanded_addresses))
-                return members
-
-            # only return the first mailbox for groups to prevent extra calls to server
-            else:
-                for mailbox_elem in response.findall(".//{%s}Mailbox" % TNS):
-                    member = Mailbox(self, mailbox_elem, group=mailbox.xml)
-                    if member.mailbox_type == "Mailbox":
-                        return { member.address: member }
-                return {}
-
-        elif mailbox.mailbox_type == "Mailbox":
-            return { mailbox.address: mailbox }
-
-    # returns all mailboxes the address delivers to
-    def Resolve(self, address):
+    # returns the mailbox for the address
+    def GetMailbox(self, address):
         # create resolve name request
         resolve_names = etree.Element("{%s}ResolveNames" % MNS, ReturnFullContactData="false")
         unresolved_entry = etree.SubElement(resolve_names, "{%s}UnresolvedEntry" % MNS)
@@ -114,8 +77,5 @@ class Session():
         # send the request
         response = self.SendRequest(resolve_names)
 
-        # create mailbox object from xml
-        mailbox = Mailbox(self, response.find(".//{%s}Mailbox" % TNS))
-
-        # expand groups and distribution lists
-        return list(self.ExpandMailbox(mailbox).values())
+        # return mailbox object from xml
+        return Mailbox(self, response.find(".//{%s}Mailbox" % TNS))

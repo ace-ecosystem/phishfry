@@ -1,2 +1,2 @@
 from .errors import MailboxNotFound, MessageNotFound
-from .session import Session
+from .account import Account

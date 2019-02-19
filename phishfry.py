@@ -6,7 +6,7 @@ import logging
 import os.path
 
 # global vars
-sessions = []
+accounts = []
 config = ConfigParser()
 
 def get_config_var(section, key, default=None):
@@ -17,7 +17,7 @@ def get_config_var(section, key, default=None):
     raise Exception("Missing required config variable config[{}][{}]".format(section, key))
 
 
-# create ews sessions from each account in the config file
+# load ews accounts from config.ini
 def load_accounts():
     config.read(args.config)
     timezone = get_config_var("DEFAULT", "timezone", default="UTC")
@@ -27,80 +27,52 @@ def load_accounts():
         version = get_config_var(section, "version", default="Exchange2016")
         user = get_config_var(section, "user")
         password = get_config_var(section, "pass")
-        sessions.append(EWS.Session(user, password, server=server, version=version, timezone=timezone))
+        accounts.append(EWS.Account(user, password, server=server, version=version, timezone=timezone))
 
 # delete action
 def delete():
-    # try all sessions
-    for session in sessions:
+    for account in accounts:
         try:
-            # find all mailboxes the recipient address delivers to
-            mailboxes = session.Resolve(args.recipient)
-
-            # delete message from all mailboxes
-            for mailbox in mailboxes:
-                logging.info("deleting {} from {}".format(args.message_id, mailbox.address))
-                try:
-                    mailbox.Delete(args.message_id)
-                    logging.info("message deleted")
-                except EWS.MessageNotFound:
-                    logging.info("message not found")
-
-            # success
+            mailbox = account.GetMailbox(args.recipient)
+            mailbox.Delete(args.message_id)
             return
 
-        # ignore mailbox not found error since mailbox may resolve on a different session
+        # ignore mailbox not found error since it might exist on another account
         except EWS.MailboxNotFound:
             pass
 
-    # we didn't find the mailbox on any session
-    logging.error("Mailbox not found")
+    # mailbox not found on any account
+    logging.error("No mailbox found for {}".format(args.recipient))
 
 # restore action
 def restore():
-    # try all sessions
-    for session in sessions:
+    for account in accounts:
         try:
-            # find all mailboxes the recipient address delivers to
-            mailboxes = session.Resolve(args.recipient)
-
-            # restore message to all mailboxes
-            for mailbox in mailboxes:
-                logging.info("restoring {} to {}".format(args.message_id, mailbox.address))
-                try:
-                    mailbox.Restore(args.message_id)
-                    logging.info("message restored")
-                except EWS.MessageNotFound:
-                    logging.info("message not found")
-
-            # success
+            mailbox = account.GetMailbox(args.recipient)
+            restored = mailbox.Restore(args.message_id)
             return
 
-        # ignore mailbox not found error since mailbox may resolve on a different session
+        # ignore mailbox not found error since it might exist on another account
         except EWS.MailboxNotFound:
             pass
 
-    # we didn't find the mailbox on any session
-    logging.error("Mailbox not found")
+    # mailbox not found on any account
+    logging.error("No mailbox found for {}".format(args.recipient))
 
 # resolve action
 def resolve():
-    # try all sessions
-    for session in sessions:
+    for account in accounts:
         try:
-            # find all mailboxes the recipient address delivers to
-            mailboxes = session.Resolve(args.recipient)
+            mailbox = account.GetMailbox(args.recipient)
+            logging.info({"address": mailbox.address, "type": mailbox.mailbox_type})
+            return
 
-            # print all resolved addresses
-            for mailbox in mailboxes:
-                logging.info(mailbox.address)
-
-        # ignore mailbox not found error since mailbox may resolve on a different session
+        # ignore mailbox not found error since it might exist on another account
         except EWS.MailboxNotFound:
             pass
 
-    # we didn't find the mailbox on any session
-    logging.error("Mailbox not found")
+    # mailbox not found on any account
+    logging.error("No mailbox found for {}".format(args.recipient))
 
 
 # global args
