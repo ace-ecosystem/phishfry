@@ -34,7 +34,8 @@ def delete():
     for account in accounts:
         try:
             mailbox = account.GetMailbox(args.recipient)
-            mailbox.Delete(args.message_id)
+            deleted = mailbox.Delete(args.message_id)
+            logging.info(deleted)
             return
 
         # ignore mailbox not found error since it might exist on another account
@@ -50,6 +51,7 @@ def restore():
         try:
             mailbox = account.GetMailbox(args.recipient)
             restored = mailbox.Restore(args.message_id)
+            logging.info(restored)
             return
 
         # ignore mailbox not found error since it might exist on another account

@@ -166,6 +166,7 @@ class Mailbox():
                 response = self.account.SendRequest(delete, impersonate=self.address)
                 log.info("Successfully deleted {} from {}".format(message_id, self.display_address))
             else:
+                deleted[self.display_address] = False
                 log.info("Message {} not found for {}".format(message_id, self.display_address))
 
         return deleted
@@ -217,6 +218,7 @@ class Mailbox():
                 response = self.account.SendRequest(restore, impersonate=self.address)
                 log.info("Successfully restored {} to {}".format(message_id, self.display_address))
             else:
+                restored[self.display_address] = False
                 log.info("Message {} not found for {}".format(message_id, self.display_address))
 
         return restored
