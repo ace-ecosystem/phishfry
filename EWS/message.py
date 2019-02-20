@@ -4,16 +4,13 @@ from lxml import etree
 class Message():
     def __init__(self, mailbox, xml):
         self.mailbox = mailbox
-
         item_id_element = xml.find("{%s}ItemId" % TNS)
         self.item_id = item_id_element.get("Id")
-        self.change_key = item_id_element.get("ChangeKey")
-
         self.message_id = xml.find("{%s}InternetMessageId" % TNS).text
 
     def ToXML(self):
         # create item element
-        item = etree.Element("{%s}ItemId" % TNS, Id=self.item_id, ChangeKey=self.change_key)
+        item = etree.Element("{%s}ItemId" % TNS, Id=self.item_id)
 
         # add mailbox reference
         if self.mailbox.group is None:

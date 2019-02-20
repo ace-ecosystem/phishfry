@@ -7,11 +7,10 @@ class Folder():
     def __init__(self, mailbox, xml):
         self.mailbox = mailbox
         self.folder_id = xml.get("Id")
-        self.change_key = xml.get("ChangeKey")
 
     def ToXML(self):
         # create folder element
-        folder = etree.Element("{%s}FolderId" % TNS, Id=self.folder_id, ChangeKey=self.change_key)
+        folder = etree.Element("{%s}FolderId" % TNS, Id=self.folder_id)
 
         # add mailbox reference
         if self.mailbox.group is None:

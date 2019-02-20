@@ -5,8 +5,8 @@ class MissingResponseCode(Exception): pass
 class UnknownError(Exception): pass
 
 ERRORS = {
-    "ErrorNameResolutionNoResults": MailboxNotFound("No mailbox found."),
-    "ErrorNonExistentMailbox": MailboxNotFound("No mailbox found."),
+    "ErrorNameResolutionNoResults": MailboxNotFound("Mailbox not found"),
+    "ErrorNonExistentMailbox": MailboxNotFound("Mailbox not found"),
     "NoError": None
 }
 
