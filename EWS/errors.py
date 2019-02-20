@@ -6,6 +6,7 @@ class UnknownError(Exception): pass
 
 ERRORS = {
     "ErrorNameResolutionNoResults": MailboxNotFound("No mailbox found."),
+    "ErrorNonExistentMailbox": MailboxNotFound("No mailbox found."),
     "NoError": None
 }
 

@@ -146,7 +146,7 @@ class Mailbox():
                 member.Delete(message_id, deleted=deleted, seen_message_ids=seen_message_ids)
 
         # delete message from mailbox
-        else:
+        elif self.mailbox_type == "Mailbox":
             # find all messages with message_id
             messages = self.AllItems.Find(message_id)
 
@@ -168,6 +168,11 @@ class Mailbox():
             else:
                 deleted[self.display_address] = False
                 log.info("Message {} not found for {}".format(message_id, self.display_address))
+
+        # mailbox is out of scope
+        else:
+            deleted[self.display_address] = False
+            log.info("{} is external mailbox".format(self.display_address))
 
         return deleted
 
@@ -196,7 +201,7 @@ class Mailbox():
                 member.Restore(message_id, restored=restored, seen_message_ids=seen_message_ids)
 
         # restore message from mailbox
-        else:
+        elif self.mailbox_type == "Mailbox":
             # find recoverable messages with message_id
             messages = self.RecoverableItems.Find(message_id)
 
@@ -220,5 +225,10 @@ class Mailbox():
             else:
                 restored[self.display_address] = False
                 log.info("Message {} not found for {}".format(message_id, self.display_address))
+
+        # mailbox is out of scope
+        else:
+            restored[self.display_address] = False
+            log.info("{} is external mailbox".format(self.display_address))
 
         return restored

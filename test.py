@@ -10,7 +10,7 @@ password = config["test"]["pass"]
 account = EWS.Account(user, password)
 
 class TestEWS(unittest.TestCase):
-    def test_remediate(self):
+    def test_remediate_forward_to_group(self):
         mailbox = account.GetMailbox("test@integraldefense.com")
 
         # test deleting email that was forwarded to group
@@ -39,6 +39,19 @@ class TestEWS(unittest.TestCase):
         restored = mailbox.Restore("non-existent-message-id>")
         self.assertIn("test@integraldefense.com", restored)
         self.assertFalse(restored["test@integraldefense.com"])
+
+    def test_remediate_reply_to_external_mailbox(self):
+        mailbox = account.GetMailbox("test@integraldefense.com")
+
+        # test deleting email that was forwarded to group
+        deleted = mailbox.Delete("<CAAoaDjQJ3Kor1nZMPJwEN56KK0pBDxyjhJjR-Hgj7ZA85hKy-w@mail.gmail.com>")
+        self.assertIn("test@integraldefense.com", deleted)
+        self.assertTrue(deleted["test@integraldefense.com"])
+
+        # test restoring email that was forwarded to group
+        restored = mailbox.Restore("<CAAoaDjQJ3Kor1nZMPJwEN56KK0pBDxyjhJjR-Hgj7ZA85hKy-w@mail.gmail.com>")
+        self.assertIn("test@integraldefense.com", restored)
+        self.assertTrue(restored["test@integraldefense.com"])
 
     def test_resolve_alias(self):
         mailbox = account.GetMailbox("test@integraldefense.onmicrosoft.com")
