@@ -1,4 +1,3 @@
-from .errors import MessageNotFound
 from lxml import etree
 from .message import Message
 from .namespaces import ENS, MNS, SNS, TNS, NSMAP
@@ -52,10 +51,6 @@ class Folder():
 
         # get list of messages in response
         response_messages = response.findall(".//{%s}Message" % TNS)
-
-        # throw exception if message not found
-        if len(response_messages) == 0:
-            raise MessageNotFound("Message not found.")
 
         # return message objects
         messages = []

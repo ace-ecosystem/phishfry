@@ -61,8 +61,8 @@ class Mailbox():
         
         # get list of members from response
         members =[Mailbox(self.account, m) for m in response.findall(".//{%s}Mailbox" % TNS)]
-
         log.info("Members of {} = {}".format(self.address, [m.address for m in members]))
+        return members
 
     def GetOwner(self):
         log.info("Getting owner of {} group".format(self.address))
