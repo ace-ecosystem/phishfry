@@ -37,17 +37,15 @@ pass=123456
 ```python
 import EWS
 
-# create an EWS session
-session = EWS.Session("admin@example1.com", "123456")
+# Instantiate an EWS account using admin email and password
+account = EWS.Account("admin@example1.com", "123456")
 
-# resolve all mailboxes that an address delivers to
-mailboxes = session.Resolve("user@example.com")
+# Get the mailbox of a recipient
+mailbox = account.GetMailbox("user@example.com")
 
-# delete a message from all mailboxes
-for mailbox in mailboxes:
-	mailbox.Delete("<message_id>")
+# delete a message
+mailbox.Delete("<message_id>")
 
 # restore a message to all mailboxes
-for mailbox in mailboxes:
-	mailbox.Restore("<message_id>")
+mailbox.Restore("<message_id>")
 ```
