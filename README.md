@@ -40,12 +40,21 @@ import EWS
 # Instantiate an EWS account using admin email and password
 account = EWS.Account("admin@example1.com", "123456")
 
-# Get the mailbox of a recipient
-mailbox = account.GetMailbox("user@example.com")
-
 # delete a message
-mailbox.Delete("<message_id>")
+results = account.Delete("user@example1.com", "<message_id>")
 
-# restore a message to all mailboxes
-mailbox.Restore("<message_id>")
+# restore a message
+results = account.Restore("user@example1.com", "<message_id>")
+
+# using the results
+for address in results:
+	# print the email address for these results
+	print(address)
+
+	# get the remediation result for this address
+	result = results[address]
+
+	# print failure message if remediation action failed
+	if not result.success:
+		print(result.message)
 ```
