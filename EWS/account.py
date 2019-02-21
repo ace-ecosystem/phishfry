@@ -81,18 +81,18 @@ class Account():
         # return mailbox object from xml
         return Mailbox(self, response.find(".//{%s}Mailbox" % TNS))
 
-    # delete a message for an address
-    def Delete(self, address, message_id):
+    # remediate a message for an address
+    def Remediate(self, action, address, message_id):
         try:
             mailbox = self.GetMailbox(address)
-            return mailbox.Delete(message_id)
+            return mailbox.Remediate(action, message_id)
         except MailboxNotFound as e:
-            return { address: RemediationResult("Unknown", success=False, message="Mailbox not found") }
+            return { address: RemediationResult("Unknown", action, success=False, message="Mailbox not found") }
+
+    # delete a message for an address
+    def Delete(self, address, message_id):
+        return self.Remediate("delete", address, message_id)
 
     # restore a message for an address
     def Restore(self, address, message_id):
-        try:
-            mailbox = self.GetMailbox(address)
-            return mailbox.Restore(message_id)
-        except MailboxNotFound as e:
-            return { address: RemediationResult("Unknown", success=False, message="Mailbox not found") }
+        return self.Remediate("restore", address, message_id)

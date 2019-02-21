@@ -13,13 +13,14 @@ ERRORS = {
 
 def GetError(response_xml):
     # find the response code
-    response_code = response_xml.find(".//{%s}ResponseCode" % MNS)
-    if response_code is None:
-        response_code = response_xml.find(".//{%s}ResponseCode" % ENS)
+    response_codes = response_xml.findall(".//{%s}ResponseCode" % MNS)
+    if len(response_codes) == 0:
+        response_code = response_xml.findall(".//{%s}ResponseCode" % ENS)
 
     # check for error
-    if response_code is None:
+    if len(response_codes) == 0:
         return MissingResponseCode("Response code not found.")
-    if response_code.text not in ERRORS:
-        return UnknownError(response_code.text)
-    return ERRORS[response_code.text]
+    for response_code in response_codes:
+        if response_code.text not in ERRORS:
+            return UnknownError(response_code.text)
+        return ERRORS[response_code.text]

@@ -48,8 +48,6 @@ class Mailbox():
         return mailbox
 
     def Expand(self):
-        log.info("expanding {}".format(self.address))
-
         # create expand dl request
         expand_dl = etree.Element("{%s}ExpandDL" % MNS)
         expand_dl.append(self.ToXML(namespace=MNS))
@@ -63,8 +61,6 @@ class Mailbox():
         return members
 
     def GetOwner(self):
-        log.info("getting owner of {}".format(self.address))
-
         # create expand dl request
         expand_dl = etree.Element("{%s}ExpandDL" % MNS)
         expand_dl.append(self.ToXML(namespace=MNS))
@@ -76,7 +72,6 @@ class Mailbox():
         for m in response.findall(".//{%s}Mailbox" % TNS):
             mailbox = Mailbox(self.account, m, group=self)
             if mailbox.mailbox_type == "Mailbox":
-                log.info("owner = {}".format(mailbox.address))
                 return mailbox
         raise Exception("Owner not found")
 
@@ -138,10 +133,8 @@ class Mailbox():
         if self.group is None:
             if self.display_address in results:
                 return
-            results[self.display_address] = RemediationResult(self.mailbox_type)
-
-        # log action
-        log.info("{} ({}, {})".format(action, self.display_address, message_id))
+            results[self.display_address] = RemediationResult(self.mailbox_type, action)
+            log.info("{}ing {} {}".format(action[:-1], self.display_address, message_id))
 
         try:
             # remediate from the group owner's mailbox
@@ -153,8 +146,9 @@ class Mailbox():
             # remediate for all members of distribution list
             elif self.mailbox_type == "PublicDL":
                 members = self.Expand()
+                results[self.display_address].result("{}d".format(action), success=True)
                 for member in members:
-                    results[self.display_address].append(member.address)
+                    results[self.display_address].members.append(member.address)
                     member.Remediate(action, message_id, results=results, seen_message_ids=seen_message_ids)
 
             # remediate message for mailbox
@@ -204,9 +198,3 @@ class Mailbox():
 
         # return results
         return results
-
-    def Delete(self, message_id):
-        return self.Remediate("delete", message_id)
-
-    def Restore(self, message_id):
-        return self.Remediate("restore", message_id)
