@@ -32,49 +32,26 @@ def load_accounts():
 # delete action
 def delete():
     for account in accounts:
-        try:
-            mailbox = account.GetMailbox(args.recipient)
-            deleted = mailbox.Delete(args.message_id)
-            logging.info(deleted)
+        results = account.Delete(args.recipient, args.message_id)
+
+        # if the address resolved on this account then stop
+        if results[args.recipient].mailbox_type != "Unknown":
             return
 
-        # ignore mailbox not found error since it might exist on another account
-        except EWS.MailboxNotFound:
-            pass
-
-    # mailbox not found on any account
-    logging.error("No mailbox found for {}".format(args.recipient))
+    # report error if mailbox not found on any account
+    logging.error("Mailbox not found")
 
 # restore action
 def restore():
     for account in accounts:
-        try:
-            mailbox = account.GetMailbox(args.recipient)
-            restored = mailbox.Restore(args.message_id)
-            logging.info(restored)
+        results = account.Restore(args.recipient, args.message_id)
+
+        # if the address resolved on this account then stop
+        if results[args.recipient].mailbox_type != "Unknown":
             return
 
-        # ignore mailbox not found error since it might exist on another account
-        except EWS.MailboxNotFound:
-            pass
-
-    # mailbox not found on any account
-    logging.error("No mailbox found for {}".format(args.recipient))
-
-# resolve action
-def resolve():
-    for account in accounts:
-        try:
-            mailbox = account.GetMailbox(args.recipient)
-            logging.info({"address": mailbox.address, "type": mailbox.mailbox_type})
-            return
-
-        # ignore mailbox not found error since it might exist on another account
-        except EWS.MailboxNotFound:
-            pass
-
-    # mailbox not found on any account
-    logging.error("No mailbox found for {}".format(args.recipient))
+    # report error if mailbox not found on any account
+    logging.error("Mailbox not found")
 
 
 # global args
@@ -95,11 +72,6 @@ restore_parser = subparsers.add_parser("restore", help="Restore a message to a r
 restore_parser.add_argument('recipient', help="Email address of the recipient")
 restore_parser.add_argument('message_id', help="Message ID of the message")
 restore_parser.set_defaults(func=restore)
-
-# resolve action
-restore_parser = subparsers.add_parser("resolve", help="Display all mailboxes for a recipient.")
-restore_parser.add_argument('recipient', help="Email address of the recipient")
-restore_parser.set_defaults(func=resolve)
 
 # parse args
 args = parser.parse_args()

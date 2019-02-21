@@ -1,9 +1,10 @@
-from .errors import GetError
+from .errors import GetError, MailboxNotFound
 from io import BytesIO
 import logging
 from lxml import etree
 from .mailbox import Mailbox
 from .namespaces import ENS, MNS, SNS, TNS, NSMAP
+from .remediation_result import RemediationResult
 import requests
 
 log = logging.getLogger(__name__)
@@ -79,3 +80,19 @@ class Account():
 
         # return mailbox object from xml
         return Mailbox(self, response.find(".//{%s}Mailbox" % TNS))
+
+    # remediate a message for an address
+    def Remediate(self, action, address, message_id):
+        try:
+            mailbox = self.GetMailbox(address)
+            return mailbox.Remediate(action, message_id)
+        except MailboxNotFound as e:
+            return { address: RemediationResult("Unknown", action, success=False, message="Mailbox not found") }
+
+    # delete a message for an address
+    def Delete(self, address, message_id):
+        return self.Remediate("delete", address, message_id)
+
+    # restore a message for an address
+    def Restore(self, address, message_id):
+        return self.Remediate("restore", address, message_id)
