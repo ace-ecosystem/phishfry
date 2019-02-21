@@ -11,47 +11,50 @@ account = EWS.Account(user, password)
 
 class TestEWS(unittest.TestCase):
     def test_remediate_forward_to_group(self):
-        mailbox = account.GetMailbox("test@integraldefense.com")
+        # restore first in case deleted
+        account.Restore("test@integraldefense.com", "<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>")
 
         # test deleting email that was forwarded to group
-        results = mailbox.Delete("<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>")
+        results = account.Delete("test@integraldefense.com", "<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>")
         self.assertIn("test@integraldefense.com", results)
         self.assertTrue(results["test@integraldefense.com"].success)
         self.assertIn("testinggroupemail@integraldefense.com", results)
         self.assertTrue(results["testinggroupemail@integraldefense.com"].success)
 
         # test restoring email that was forwarded to group
-        results = mailbox.Restore("<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>")
+        results = account.Restore("test@integraldefense.com", "<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>")
         self.assertIn("test@integraldefense.com", results)
         self.assertTrue(results["test@integraldefense.com"].success)
         self.assertIn("testinggroupemail@integraldefense.com", results)
         self.assertTrue(results["testinggroupemail@integraldefense.com"].success)
 
     def test_remediate_non_existent_message(self):
-        mailbox = account.GetMailbox("test@integraldefense.com")
+        # restore first in case it is deleted
+        account.Restore("test@integraldefense.com", "<non-existent-message-id>")
 
         # test deleting non existent message
-        results = mailbox.Delete("<non-existent-message-id>")
+        results = account.Delete("test@integraldefense.com", "<non-existent-message-id>")
         self.assertIn("test@integraldefense.com", results)
         self.assertTrue(results["test@integraldefense.com"].success)
         self.assertEqual(results["test@integraldefense.com"].message, "Message not found")
 
         # test restoring non existent message
-        results = mailbox.Restore("<non-existent-message-id>")
+        results = account.Restore("test@integraldefense.com", "<non-existent-message-id>")
         self.assertIn("test@integraldefense.com", results)
         self.assertFalse(results["test@integraldefense.com"].success)
         self.assertEqual(results["test@integraldefense.com"].message, "Message not found")
 
     def test_remediate_reply_to_external_mailbox(self):
-        mailbox = account.GetMailbox("test@integraldefense.com")
+        # restore first in case deleted
+        account.Restore("test@integraldefense.com", "<CAAoaDjQJ3Kor1nZMPJwEN56KK0pBDxyjhJjR-Hgj7ZA85hKy-w@mail.gmail.com>")
 
         # test deleting email that was forwarded to external mailbox
-        results = mailbox.Delete("<CAAoaDjQJ3Kor1nZMPJwEN56KK0pBDxyjhJjR-Hgj7ZA85hKy-w@mail.gmail.com>")
+        results = account.Delete("test@integraldefense.com", "<CAAoaDjQJ3Kor1nZMPJwEN56KK0pBDxyjhJjR-Hgj7ZA85hKy-w@mail.gmail.com>")
         self.assertIn("test@integraldefense.com", results)
         self.assertTrue(results["test@integraldefense.com"].success)
 
         # test restoring email that was forwarded to external mailbox
-        results = mailbox.Restore("<CAAoaDjQJ3Kor1nZMPJwEN56KK0pBDxyjhJjR-Hgj7ZA85hKy-w@mail.gmail.com>")
+        results = account.Restore("test@integraldefense.com", "<CAAoaDjQJ3Kor1nZMPJwEN56KK0pBDxyjhJjR-Hgj7ZA85hKy-w@mail.gmail.com>")
         self.assertIn("test@integraldefense.com", results)
         self.assertTrue(results["test@integraldefense.com"].success)
 

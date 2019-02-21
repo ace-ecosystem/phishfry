@@ -1,6 +1,7 @@
 from .namespaces import ENS, MNS, SNS, TNS, NSMAP
 
 class MailboxNotFound(Exception): pass
+class MessageNotFound(Exception): pass
 class MissingResponseCode(Exception): pass
 class UnknownError(Exception): pass
 

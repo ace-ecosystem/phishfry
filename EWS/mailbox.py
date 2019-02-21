@@ -1,4 +1,4 @@
-from .errors import MailboxNotFound
+from .errors import MailboxNotFound, MessageNotFound
 from .folder import Folder, DistinguishedFolder
 import logging
 from lxml import etree
@@ -78,7 +78,7 @@ class Mailbox():
             if mailbox.mailbox_type == "Mailbox":
                 log.info("owner = {}".format(mailbox.address))
                 return mailbox
-        return None
+        raise Exception("Owner not found")
 
     def FindRecipients(self, messages, message_id, seen_message_ids):
         # get list of all messages which are not the original message
@@ -116,8 +116,19 @@ class Mailbox():
 
         return recipients
 
+    def CreateRemediationRequest(self, action):
+        # return delete request
+        if action == "delete":
+            return etree.Element("{%s}DeleteItem" % MNS, DeleteType="SoftDelete")
+
+        # return restore request
+        request = etree.Element("{%s}MoveItem" % MNS)
+        to_folder = etree.SubElement(request, "{%s}ToFolderId" % MNS)
+        to_folder.append(DistinguishedFolder(self, "inbox").ToXML())
+        return request
+
     def Remediate(self, action, message_id, results=None, seen_message_ids=None):
-        # don't retrieve recipients for same message twice
+        # don't retrieve recipients for the same message twice
         if seen_message_ids is None:
             seen_message_ids = { message_id: True }
 
@@ -132,105 +143,66 @@ class Mailbox():
         # log action
         log.info("{} ({}, {})".format(action, self.display_address, message_id))
 
-        # remediate from the group owner's mailbox
-        if self.mailbox_type == "GroupMailbox":
-            try:
+        try:
+            # remediate from the group owner's mailbox
+            if self.mailbox_type == "GroupMailbox":
                 owner = self.GetOwner()
-            except Exception as e:
-                log.info(e)
-                results[self.display_address].message = str(e)
-                results[self.display_address].success = False
-                return results
-
-            results[self.display_address].owner = owner.address
-            if owner is not None:
+                results[self.display_address].owner = owner.address
                 owner.Remediate(action, message_id, results=results, seen_message_ids=seen_message_ids)
 
-        # remediate for all members of distribution list
-        elif self.mailbox_type == "PublicDL":
-            try:
+            # remediate for all members of distribution list
+            elif self.mailbox_type == "PublicDL":
                 members = self.Expand()
-            except Exception as e:
-                log.info(e)
-                results[self.display_address].message = str(e)
-                results[self.display_address].success = False
-                return results
+                for member in members:
+                    results[self.display_address].append(member.address)
+                    member.Remediate(action, message_id, results=results, seen_message_ids=seen_message_ids)
 
-            results[self.display_address].members = [m.address for m in members]
-            for member in members:
-                member.Remediate(action, message_id, results=results, seen_message_ids=seen_message_ids)
-
-        # remediate message in mailbox
-        elif self.mailbox_type == "Mailbox":
-            # find all messages with message_id
-            messages = []
-            try:
+            # remediate message for mailbox
+            elif self.mailbox_type == "Mailbox":
+                # find all messages with message_id
+                messages = []
                 if action == "delete":
                     messages = self.AllItems.Find(message_id)
                 else:
                     messages = self.RecoverableItems.Find(message_id)
-            except Exception as e:
-                log.info(e)
-                results[self.display_address].message = str(e)
-                results[self.display_address].success = False
-                return results
 
-            # if messages were found
-            if len(messages) > 0:
                 # get list of recipients the messsage was forwarded to
-                try:
-                    forwards = self.FindRecipients(messages, message_id, seen_message_ids)
-                except Exception as e:
-                    log.info(e)
-                    results[self.display_address].message = str(e)
-                    results[self.display_address].success = False
-                    return results
+                forwards = self.FindRecipients(messages, message_id, seen_message_ids)
 
-                # create delete request
-                if action == "delete":
-                    request = etree.Element("{%s}DeleteItem" % MNS, DeleteType="SoftDelete")
-
-                # create restore request
-                else:
-                    request = etree.Element("{%s}MoveItem" % MNS)
-                    to_folder = etree.SubElement(request, "{%s}ToFolderId" % MNS)
-                    to_folder.append(DistinguishedFolder(self, "inbox").ToXML())
-
-                # add item ids to request
+                # create remediation request
+                request = self.CreateRemediationRequest(action)
                 item_ids = etree.SubElement(request, "{%s}ItemIds" % MNS)
                 for message in messages:
                     item_ids.append(message.ToXML())
 
                 # send the request
-                try:
-                    response = self.account.SendRequest(request, impersonate=self.address)
-                    log.info("{}d".format(action))
-                    results[self.display_address].message = "{}d".format(action)
-                except Exception as e:
-                    log.info(e)
-                    results[self.display_address].message = str(e)
-                    results[self.display_address].success = False
-                    return results
+                response = self.account.SendRequest(request, impersonate=self.address)
+
+                #TODO check for individual errors
+
+                # mark as successful
+                results[self.display_address].result("{}d".format(action), success=True)
 
                 # remediate for forwarded recipients
-                if len(forwards) > 0:
-                    results[self.display_address].forwards = [f.address for f in forwards]
                 for recipient in forwards:
+                    results[self.display_address].forwards.append(recipient.address)
                     recipient.Remediate(action, message_id, results=results, seen_message_ids=seen_message_ids)
 
-            # message not found
+            # mailbox is external
             else:
-                results[self.display_address].message = "Message not found"
-                if action == "restore":
-                    results[self.display_address].success = False
-                log.info("message not found")
+                raise MailboxNotFound("Mailbox not found")
 
-        # mailbox is external
-        else:
-            results[self.display_address].message = "Mailbox not found"
-            results[self.display_address].success = False
-            log.info("mailbox not found")
+        # set result if Message not found
+        except MessageNotFound as e:
+            # stil consider delete successful since the message is already deleted
+            success = action == "delete"
+            results[self.display_address].result(str(e), success=success)
 
+        # set result error if exception is raised
+        except Exception as e:
+            results[self.display_address].result(str(e))
+
+        # return results
         return results
 
     def Delete(self, message_id):
