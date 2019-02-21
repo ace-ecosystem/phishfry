@@ -133,7 +133,7 @@ class Mailbox():
         if self.group is None:
             if self.display_address in results:
                 return
-            results[self.display_address] = RemediationResult(self.mailbox_type, action)
+            results[self.address] = RemediationResult(self.address, message_id, self.mailbox_type, action)
             log.info("{}ing {} {}".format(action[:-1], self.display_address, message_id))
 
         try:

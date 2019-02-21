@@ -87,7 +87,7 @@ class Account():
             mailbox = self.GetMailbox(address)
             return mailbox.Remediate(action, message_id)
         except MailboxNotFound as e:
-            return { address: RemediationResult("Unknown", action, success=False, message="Mailbox not found") }
+            return { address: RemediationResult(address, message_id, "Unknown", action, success=False, message="Mailbox not found") }
 
     # delete a message for an address
     def Delete(self, address, message_id):
