@@ -12,7 +12,7 @@ class Mailbox():
     def __init__(self, account, xml, group=None):
         self.account = account
         self.group = group
-        self.address = xml.find("{%s}EmailAddress" % TNS).text
+        self.address = xml.find("{%s}EmailAddress" % TNS).text.lower()
         self.mailbox_type = xml.find("{%s}MailboxType" % TNS).text
 
     @property

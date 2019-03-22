@@ -76,18 +76,20 @@ class Account():
         unresolved_entry.text = "smtp:{}".format(address)
 
         # send the request
-        response = self.SendRequest(resolve_names)
+        try:
+            response = self.SendRequest(resolve_names)
+        except MailboxNotFound as e:
+            return None
 
         # return mailbox object from xml
         return Mailbox(self, response.find(".//{%s}Mailbox" % TNS))
 
     # remediate a message for an address
     def Remediate(self, action, address, message_id):
-        try:
-            mailbox = self.GetMailbox(address)
-            return mailbox.Remediate(action, message_id)
-        except MailboxNotFound as e:
+        mailbox = self.GetMailbox(address)
+        if mailbox is None:
             return { address: RemediationResult(address, message_id, "Unknown", action, success=False, message="Mailbox not found") }
+        return mailbox.Remediate(action, message_id)
 
     # delete a message for an address
     def Delete(self, address, message_id):
