@@ -98,3 +98,11 @@ class Account():
     # restore a message for an address
     def Restore(self, address, message_id):
         return self.Remediate("restore", address, message_id)
+
+    # get inbox rules for an address
+    def GetInboxRules(self, address):
+        mailbox = self.GetMailbox(address)
+        if mailbox is None:
+            return False
+        mailbox.GetInboxRules()
+        return True

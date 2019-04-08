@@ -53,6 +53,18 @@ def restore():
     # report error if mailbox not found on any account
     logging.error("Mailbox not found")
 
+# rules action
+def rules():
+    for account in accounts:
+        results = account.GetInboxRules(args.recipient)
+
+        # if the address resolved on this account then stop
+        if results:
+            return
+
+    # report error if mailbox not found on any account
+    logging.error("Mailbox not found")
+
 
 # global args
 parser = argparse.ArgumentParser()
@@ -72,6 +84,11 @@ restore_parser = subparsers.add_parser("restore", help="Restore a message to a r
 restore_parser.add_argument('recipient', help="Email address of the recipient")
 restore_parser.add_argument('message_id', help="Message ID of the message")
 restore_parser.set_defaults(func=restore)
+
+# rules args
+rules_parser = subparsers.add_parser("rules", help="Get the inbox rules for a recipient.")
+rules_parser.add_argument('recipient', help="Email address of the recipient")
+rules_parser.set_defaults(func=rules)
 
 # parse args
 args = parser.parse_args()

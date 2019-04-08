@@ -75,6 +75,15 @@ class Mailbox():
                 return mailbox
         raise Exception("Owner not found")
 
+    def GetInboxRules(self):
+        # create get rules request
+        get_rules = etree.Element("{%s}GetInboxRules" % MNS)
+        mailbox_address = etree.SubElement(get_rules, "{%s}MailboxSmtpAddress" % MNS)
+        mailbox_address.text = self.address
+
+        # send the request
+        response = self.account.SendRequest(get_rules)
+
     def FindRecipients(self, messages, message_id, seen_message_ids):
         # get list of all messages which are not the original message
         forwarded_messages = []
@@ -171,8 +180,6 @@ class Mailbox():
 
                 # send the request
                 response = self.account.SendRequest(request, impersonate=self.address)
-
-                #TODO check for individual errors
 
                 # mark as successful
                 results[self.display_address].result("{}d".format(action), success=True)
