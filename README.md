@@ -1,5 +1,5 @@
 # PhishFry Remediation Library and Command Line Tool
-PhishFry is a python library and command line tool for removing and restoring emails in exchange and office365.
+PhishFry is a python library and command line tool for removing and restoring emails in exchange and office365. PhishFry supports shared mailboxes, group mailboxes and distribution lists. PhishFry removes/restores the entire conversation including any replies and forwards of the message.
 
 ## Installation
 Clone the repo and run the setup script.
