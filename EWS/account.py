@@ -93,7 +93,7 @@ class Account():
 
     # delete a message for an address
     def Delete(self, address, message_id):
-        return self.Remediate("delete", address, message_id)
+        return self.Remediate("remove", address, message_id)
 
     # restore a message for an address
     def Restore(self, address, message_id):
