@@ -26,8 +26,8 @@ pass=123456
 # display usage information
 ./phishfry.py -h
 
-# Deletes message with message_id=<message_id> from the test@example.com mailbox
-./phishfry.py delete test@example.com "<message_id>"
+# Remove message with message_id=<message_id> from the test@example.com mailbox
+./phishfry.py remove test@example.com "<message_id>"
 
 # Restores message with message_id="<message_id>" to the test@example.com mailbox
 ./phishfry.py restore test@example.com "<message_id>"
@@ -40,8 +40,8 @@ import EWS
 # Instantiate an EWS account using admin email and password
 account = EWS.Account("admin@example1.com", "123456")
 
-# delete a message
-results = account.Delete("user@example1.com", "<message_id>")
+# remove a message
+results = account.Remove("user@example1.com", "<message_id>")
 
 # restore a message
 results = account.Restore("user@example1.com", "<message_id>")
