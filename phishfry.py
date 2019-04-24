@@ -32,7 +32,7 @@ def load_accounts():
 # remove action
 def remove():
     for account in accounts:
-        results = account.Delete(args.recipient, args.message_id)
+        results = account.Remove(args.recipient, args.message_id)
 
         # if the address resolved on this account then stop
         if results[args.recipient].mailbox_type != "Unknown":
