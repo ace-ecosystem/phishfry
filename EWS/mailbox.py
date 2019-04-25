@@ -122,7 +122,7 @@ class Mailbox():
 
     def CreateRemediationRequest(self, action):
         # return delete request
-        if action == "delete":
+        if action == "remove":
             return etree.Element("{%s}DeleteItem" % MNS, DeleteType="SoftDelete")
 
         # return restore request
@@ -164,7 +164,7 @@ class Mailbox():
             elif self.mailbox_type == "Mailbox":
                 # find all messages with message_id
                 messages = []
-                if action == "delete":
+                if action == "remove":
                     messages = self.AllItems.Find(message_id)
                 else:
                     messages = self.RecoverableItems.Find(message_id)
@@ -196,7 +196,7 @@ class Mailbox():
         # set result if Message not found
         except MessageNotFound as e:
             # stil consider delete successful since the message is already deleted
-            success = action == "delete"
+            success = action == "remove"
             results[self.display_address].result(str(e), success=success)
 
         # set result error if exception is raised

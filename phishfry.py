@@ -29,10 +29,10 @@ def load_accounts():
         password = get_config_var(section, "pass")
         accounts.append(EWS.Account(user, password, server=server, version=version, timezone=timezone))
 
-# delete action
-def delete():
+# remove action
+def remove():
     for account in accounts:
-        results = account.Delete(args.recipient, args.message_id)
+        results = account.Remove(args.recipient, args.message_id)
 
         # if the address resolved on this account then stop
         if results[args.recipient].mailbox_type != "Unknown":
@@ -73,11 +73,11 @@ parser.add_argument("-c", dest="config", nargs="?", default=default_config_path,
 parser.add_argument("-v", dest="verbose", help="display verbose output", action="store_true")
 subparsers = parser.add_subparsers(dest="action")
 
-# delete args
-delete_parser = subparsers.add_parser("delete", help="Delete a message from a recipient's mailbox.")
-delete_parser.add_argument('recipient', help="Email address of the recipient")
-delete_parser.add_argument('message_id', help="Message ID of the message")
-delete_parser.set_defaults(func=delete)
+# remove args
+remove_parser = subparsers.add_parser("remove", help="Remove a message from a recipient's mailbox.")
+remove_parser.add_argument('recipient', help="Email address of the recipient")
+remove_parser.add_argument('message_id', help="Message ID of the message")
+remove_parser.set_defaults(func=remove)
 
 # restore args
 restore_parser = subparsers.add_parser("restore", help="Restore a message to a recipient's mailbox.")
