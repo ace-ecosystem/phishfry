@@ -4,6 +4,7 @@ from configparser import ConfigParser
 import EWS
 import logging
 import os.path
+import time
 
 # global vars
 accounts = []
@@ -103,7 +104,9 @@ if args.action:
     load_accounts()
 
     # execute the action
+    start_time = time.time()
     args.func()
+    logging.info("took {}s".format(time.time() - start_time))
 
 # print help if no action given
 else:
