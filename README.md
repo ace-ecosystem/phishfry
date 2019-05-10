@@ -2,11 +2,9 @@
 PhishFry is a python library and command line tool for removing and restoring emails in exchange and office365. PhishFry supports shared mailboxes, group mailboxes and distribution lists. PhishFry removes/restores the entire conversation including any replies and forwards of the message.
 
 ## Installation
-Clone the repo and run the setup script.
+Install with pip directly from github.
 ```bash
-git@github.com:IntegralDefense/phishfry.git
-cd phishfry
-./setup.sh
+sudo pip install git+https://github.com/KarmaPenny/phishfry.git
 ```
 
 Add credentials for one or more exchange accounts with impersonation rights to the config.ini file.
@@ -35,10 +33,10 @@ pass=123456
 
 ## Library
 ```python
-import EWS
+import phishfry
 
-# Instantiate an EWS account using admin email and password
-account = EWS.Account("admin@example1.com", "123456")
+# Instantiate a phishfry account using admin email and password
+account = phishfry.Account("admin@example1.com", "123456")
 
 # remove a message
 results = account.Remove("user@example1.com", "<message_id>")

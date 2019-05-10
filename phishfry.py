@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 from configparser import ConfigParser
-import EWS
+import phishfry
 import logging
 import os.path
 import time
@@ -28,7 +28,7 @@ def load_accounts():
         version = get_config_var(section, "version", default="Exchange2016")
         user = get_config_var(section, "user")
         password = get_config_var(section, "pass")
-        accounts.append(EWS.Account(user, password, server=server, version=version, timezone=timezone))
+        accounts.append(phishfry.Account(user, password, server=server, version=version, timezone=timezone))
 
 # remove action
 def remove():
