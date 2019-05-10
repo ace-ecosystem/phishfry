@@ -4,7 +4,7 @@ PhishFry is a python library and command line tool for removing and restoring em
 ## Installation
 Install with pip directly from github.
 ```bash
-sudo pip install git+https://github.com/KarmaPenny/phishfry.git
+sudo pip install git+https://github.com/IntegralDefense/phishfry.git
 ```
 
 Add credentials for one or more exchange accounts with impersonation rights to the config.ini file.

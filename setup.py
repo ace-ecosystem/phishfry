@@ -21,5 +21,5 @@ setup(
     packages=['phishfry'],
     python_requires=">=2.7",
     zip_safe=False,
-    url='https://github.com/KarmaPenny/phishfry',
+    url='https://github.com/IntegralDefense/phishfry',
 )
