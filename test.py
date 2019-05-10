@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 from configparser import ConfigParser
-import EWS
+import phishfry
 import unittest
 
 config = ConfigParser()
 config.read("/opt/phishfry/config.ini")
 user = config["test"]["user"]
 password = config["test"]["pass"]
-account = EWS.Account(user, password)
+account = phishfry.Account(user, password)
 
-class TestEWS(unittest.TestCase):
+class TestPhishfry(unittest.TestCase):
     def test_remediate_forward_to_group(self):
         # restore first in case deleted
         account.Restore("test@integraldefense.com", "<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>")
@@ -63,7 +63,7 @@ class TestEWS(unittest.TestCase):
         self.assertEqual(mailbox.address, "test@integraldefense.com")
 
     def test_resolve_non_existent_email(self):
-        with self.assertRaises(EWS.MailboxNotFound):
+        with self.assertRaises(phishfry.MailboxNotFound):
             mailbox = account.GetMailbox("non_existent@integraldefense.com")
 
     def test_expand_distribution_list(self):

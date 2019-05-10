@@ -35,10 +35,10 @@ pass=123456
 
 ## Library
 ```python
-import EWS
+import phishfry
 
-# Instantiate an EWS account using admin email and password
-account = EWS.Account("admin@example1.com", "123456")
+# Instantiate a phishfry account using admin email and password
+account = phishfry.Account("admin@example1.com", "123456")
 
 # remove a message
 results = account.Remove("user@example1.com", "<message_id>")
