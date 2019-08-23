@@ -85,19 +85,19 @@ class Account():
         return Mailbox(self, response.find(".//{%s}Mailbox" % TNS))
 
     # remediate a message for an address
-    def Remediate(self, action, address, message_id):
+    def Remediate(self, action, address, message_id, spider):
         mailbox = self.GetMailbox(address)
         if mailbox is None:
             return { address: RemediationResult(address, message_id, "Unknown", action, success=False, message="Mailbox not found") }
-        return mailbox.Remediate(action, message_id)
+        return mailbox.Remediate(action, message_id, spider)
 
     # delete a message for an address
-    def Remove(self, address, message_id):
-        return self.Remediate("remove", address, message_id)
+    def Remove(self, address, message_id, spider=False):
+        return self.Remediate("remove", address, message_id, spider)
 
     # restore a message for an address
-    def Restore(self, address, message_id):
-        return self.Remediate("restore", address, message_id)
+    def Restore(self, address, message_id, spider=False):
+        return self.Remediate("restore", address, message_id, spider)
 
     # get inbox rules for an address
     def GetInboxRules(self, address):
