@@ -10,7 +10,7 @@ import requests
 log = logging.getLogger(__name__)
 
 class Account():
-    def __init__(self, user, password, server="outlook.office365.com", version="Exchange2016", timezone="UTC"):
+    def __init__(self, user, password, server="outlook.office365.com", version="Exchange2016", timezone="UTC", proxies={}):
         self.version = version
         self.session = requests.Session()
         self.user = user
@@ -18,6 +18,7 @@ class Account():
         self.session.headers.update({'Content-Type': 'text/xml; charset=utf-8', 'Accept-Encoding': 'gzip, deflate'})
         self.url = "https://{}/EWS/Exchange.asmx".format(server)
         self.timezone = timezone
+        self.session.proxies = proxies
 
     def SendRequest(self, request, impersonate=None):
         headers = {}
