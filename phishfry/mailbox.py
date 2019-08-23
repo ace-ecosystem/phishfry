@@ -131,7 +131,7 @@ class Mailbox():
         to_folder.append(DistinguishedFolder(self, "inbox").ToXML())
         return request
 
-    def Remediate(self, action, message_id, results=None, seen_message_ids=None):
+    def Remediate(self, action, message_id, spider, results=None, seen_message_ids=None):
         # don't retrieve recipients for the same message twice
         if seen_message_ids is None:
             seen_message_ids = { message_id: True }
@@ -150,7 +150,7 @@ class Mailbox():
             if self.mailbox_type == "GroupMailbox":
                 owner = self.GetOwner()
                 results[self.display_address].owner = owner.address
-                owner.Remediate(action, message_id, results=results, seen_message_ids=seen_message_ids)
+                owner.Remediate(action, message_id, spider, results=results, seen_message_ids=seen_message_ids)
 
             # remediate for all members of distribution list
             elif self.mailbox_type == "PublicDL":
@@ -158,19 +158,21 @@ class Mailbox():
                 results[self.display_address].result("{}d".format(action), success=True)
                 for member in members:
                     results[self.display_address].members.append(member.address)
-                    member.Remediate(action, message_id, results=results, seen_message_ids=seen_message_ids)
+                    member.Remediate(action, message_id, spider, results=results, seen_message_ids=seen_message_ids)
 
             # remediate message for mailbox
             elif self.mailbox_type == "Mailbox":
                 # find all messages with message_id
                 messages = []
                 if action == "remove":
-                    messages = self.AllItems.Find(message_id)
+                    messages = self.AllItems.Find(message_id, spider)
                 else:
-                    messages = self.RecoverableItems.Find(message_id)
+                    messages = self.RecoverableItems.Find(message_id, spider)
 
                 # get list of recipients the messsage was forwarded to
-                forwards = self.FindRecipients(messages, message_id, seen_message_ids)
+                forwards = []
+                if spider:
+                    forwards = self.FindRecipients(messages, message_id, seen_message_ids)
 
                 # create remediation request
                 request = self.CreateRemediationRequest(action)
@@ -187,7 +189,7 @@ class Mailbox():
                 # remediate for forwarded recipients
                 for recipient in forwards:
                     results[self.display_address].forwards.append(recipient.address)
-                    recipient.Remediate(action, message_id, results=results, seen_message_ids=seen_message_ids)
+                    recipient.Remediate(action, message_id, spider, results=results, seen_message_ids=seen_message_ids)
 
             # mailbox is external
             else:

@@ -12,17 +12,17 @@ account = phishfry.Account(user, password)
 class TestPhishfry(unittest.TestCase):
     def test_remediate_forward_to_group(self):
         # restore first in case deleted
-        account.Restore("test@integraldefense.com", "<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>")
+        account.Restore("test@integraldefense.com", "<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>", True)
 
         # test deleting email that was forwarded to group
-        results = account.Delete("test@integraldefense.com", "<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>")
+        results = account.Remove("test@integraldefense.com", "<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>", True)
         self.assertIn("test@integraldefense.com", results)
         self.assertTrue(results["test@integraldefense.com"].success)
         self.assertIn("testinggroupemail@integraldefense.com", results)
         self.assertTrue(results["testinggroupemail@integraldefense.com"].success)
 
         # test restoring email that was forwarded to group
-        results = account.Restore("test@integraldefense.com", "<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>")
+        results = account.Restore("test@integraldefense.com", "<CAAoaDjT=8xPVW6e=yyv2eji7rzUMxPwnv6uMJJVzYbFK=LPCVw@mail.gmail.com>", True)
         self.assertIn("test@integraldefense.com", results)
         self.assertTrue(results["test@integraldefense.com"].success)
         self.assertIn("testinggroupemail@integraldefense.com", results)
@@ -33,7 +33,7 @@ class TestPhishfry(unittest.TestCase):
         account.Restore("test@integraldefense.com", "<non-existent-message-id>")
 
         # test deleting non existent message
-        results = account.Delete("test@integraldefense.com", "<non-existent-message-id>")
+        results = account.Remove("test@integraldefense.com", "<non-existent-message-id>")
         self.assertIn("test@integraldefense.com", results)
         self.assertTrue(results["test@integraldefense.com"].success)
         self.assertEqual(results["test@integraldefense.com"].message, "Message not found")
@@ -49,7 +49,7 @@ class TestPhishfry(unittest.TestCase):
         account.Restore("test@integraldefense.com", "<CAAoaDjQJ3Kor1nZMPJwEN56KK0pBDxyjhJjR-Hgj7ZA85hKy-w@mail.gmail.com>")
 
         # test deleting email that was forwarded to external mailbox
-        results = account.Delete("test@integraldefense.com", "<CAAoaDjQJ3Kor1nZMPJwEN56KK0pBDxyjhJjR-Hgj7ZA85hKy-w@mail.gmail.com>")
+        results = account.Remove("test@integraldefense.com", "<CAAoaDjQJ3Kor1nZMPJwEN56KK0pBDxyjhJjR-Hgj7ZA85hKy-w@mail.gmail.com>")
         self.assertIn("test@integraldefense.com", results)
         self.assertTrue(results["test@integraldefense.com"].success)
 
@@ -63,8 +63,8 @@ class TestPhishfry(unittest.TestCase):
         self.assertEqual(mailbox.address, "test@integraldefense.com")
 
     def test_resolve_non_existent_email(self):
-        with self.assertRaises(phishfry.MailboxNotFound):
-            mailbox = account.GetMailbox("non_existent@integraldefense.com")
+        mailbox = account.GetMailbox("non_existent@integraldefense.com")
+        self.assertEqual(mailbox, None)
 
     def test_expand_distribution_list(self):
         mailbox = account.GetMailbox("testemaillist@integraldefense.com")

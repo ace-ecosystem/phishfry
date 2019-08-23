@@ -26,7 +26,7 @@ class Folder():
     def account(self):
         return self.mailbox.account
 
-    def Find(self, message_id):
+    def Find(self, message_id, spider):
         # create find item request
         find_item = etree.Element("{%s}FindItem" % MNS, Traversal="Shallow")
 
@@ -40,7 +40,10 @@ class Folder():
         etree.SubElement(additional_properties, "{%s}FieldURI" % TNS, FieldURI="message:InternetMessageId")
 
         # add restriction for message_id
-        find_item.append(Restriction(Or(IsEqualTo("message:InternetMessageId", message_id), Contains("message:References", message_id))))
+        if spider:
+            find_item.append(Restriction(Or(IsEqualTo("message:InternetMessageId", message_id), Contains("message:References", message_id))))
+        else:
+            find_item.append(Restriction(IsEqualTo("message:InternetMessageId", message_id)))
 
         # add parent folder to search in
         parent_folder = etree.SubElement(find_item, "{%s}ParentFolderIds" % MNS)

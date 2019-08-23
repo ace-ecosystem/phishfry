@@ -33,7 +33,7 @@ def load_accounts():
 # remove action
 def remove():
     for account in accounts:
-        results = account.Remove(args.recipient, args.message_id)
+        results = account.Remove(args.recipient, args.message_id, args.spider)
 
         # if the address resolved on this account then stop
         if results[args.recipient].mailbox_type != "Unknown":
@@ -45,7 +45,7 @@ def remove():
 # restore action
 def restore():
     for account in accounts:
-        results = account.Restore(args.recipient, args.message_id)
+        results = account.Restore(args.recipient, args.message_id, args.spider)
 
         # if the address resolved on this account then stop
         if results[args.recipient].mailbox_type != "Unknown":
@@ -71,6 +71,7 @@ def rules():
 parser = argparse.ArgumentParser()
 default_config_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.ini")
 parser.add_argument("-c", dest="config", nargs="?", default=default_config_path, help="specify config path")
+parser.add_argument("-s", dest="spider", help="spider forwards and replies", action="store_true")
 parser.add_argument("-v", dest="verbose", help="display verbose output", action="store_true")
 subparsers = parser.add_subparsers(dest="action")
 
