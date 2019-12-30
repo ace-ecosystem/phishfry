@@ -3,13 +3,46 @@ import logging
 
 from lxml import etree
 import requests
+import requests_ntlm
 
 from .errors import GetError, MailboxNotFound
 from .mailbox import Mailbox
 from .namespaces import ENS, MNS, SNS, TNS, NSMAP
 from .remediation_result import RemediationResult
 
+
 log = logging.getLogger(__name__)
+
+
+BASIC = "basic"
+NTLM = "ntlm"
+
+
+AUTH_TYPES_MAP = {
+    BASIC: requests.auth.HTTPBasicAuth,
+    NTLM: requests_ntlm.HttpNtlmAuth,
+}
+
+
+def get_auth(auth_type, user, password):
+    """Return requests.Session.auth-compatible authentication object."""
+
+    logging.debug("getting auth type")
+
+    if auth_type == NTLM:
+        # XXX - Should we look for backslashes first?
+        user = f"\\{user}"
+
+    try:
+        auth_object = AUTH_TYPES_MAP[auth_type](user, password)
+    except KeyError:
+        message = f"auth type {auth_type} not supported by phishfry"
+        logging.error(message)
+        raise ValueError(message)
+    else:
+        logging.debug(f"created {auth_object.__class__.__name__} for auth type {auth_type}")
+        return auth_object
+
 
 class Account():
     def __init__(
@@ -21,11 +54,12 @@ class Account():
         timezone="UTC",
         proxies={},
         adapter=requests.adapter.HTTPAdapter(),
+        auth_type=BASIC,
     ):
         self.version = version
         self.session = requests.Session()
         self.user = user
-        self.session.auth = (user, password)
+        self.session.auth = get_auth(auth_type, user, password)
         self.session.mount('http://', adapter)
         self.session.mount('https://', adapter)
         self.session.headers.update({'Content-Type': 'text/xml; charset=utf-8', 'Accept-Encoding': 'gzip, deflate'})
