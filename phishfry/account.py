@@ -1,20 +1,33 @@
-from .errors import GetError, MailboxNotFound
 from io import BytesIO
 import logging
+
 from lxml import etree
+import requests
+
+from .errors import GetError, MailboxNotFound
 from .mailbox import Mailbox
 from .namespaces import ENS, MNS, SNS, TNS, NSMAP
 from .remediation_result import RemediationResult
-import requests
 
 log = logging.getLogger(__name__)
 
 class Account():
-    def __init__(self, user, password, server="outlook.office365.com", version="Exchange2016", timezone="UTC", proxies={}):
+    def __init__(
+        self,
+        user,
+        password,
+        server="outlook.office365.com",
+        version="Exchange2016",
+        timezone="UTC",
+        proxies={},
+        adapter=requests.adapter.HTTPAdapter(),
+    ):
         self.version = version
         self.session = requests.Session()
         self.user = user
         self.session.auth = (user, password)
+        self.session.mount('http://', adapter)
+        self.session.mount('https://', adapter)
         self.session.headers.update({'Content-Type': 'text/xml; charset=utf-8', 'Accept-Encoding': 'gzip, deflate'})
         self.url = "https://{}/EWS/Exchange.asmx".format(server)
         self.timezone = timezone
