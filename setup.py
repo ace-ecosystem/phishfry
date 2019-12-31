@@ -17,7 +17,7 @@ setup(
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
     keywords='ews exchange microsoft outlook exchange-web-services o365 office365',
-    install_requires=['requests>=2.7', 'lxml>3.0'],
+    install_requires=['requests>=2.7', 'lxml>3.0', 'requests_ntlm'],
     packages=['phishfry'],
     python_requires=">=2.7",
     zip_safe=False,
