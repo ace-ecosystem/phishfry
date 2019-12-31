@@ -53,7 +53,7 @@ class Account():
         version="Exchange2016",
         timezone="UTC",
         proxies={},
-        adapter=requests.adapter.HTTPAdapter(),
+        adapter=requests.adapters.HTTPAdapter(),
         auth_type=BASIC,
     ):
         self.version = version
