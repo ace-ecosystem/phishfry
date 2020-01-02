@@ -12,12 +12,15 @@ class Folder():
     def ToXML(self):
         # create folder element
         folder = etree.Element("{%s}FolderId" % TNS, Id=self.folder_id)
+        
+        # Don't add 'Mailbox' element as it's not a valid child of
+        #    FolderId XML element.
 
-        # add mailbox reference
-        if self.mailbox.group is None:
-            folder.append(self.mailbox.ToXML())
-        else:
-            folder.append(self.mailbox.group.ToXML())
+        # # add mailbox reference
+        # if self.mailbox.group is None:
+        #     folder.append(self.mailbox.ToXML())
+        # else:
+        #     folder.append(self.mailbox.group.ToXML())
 
         # return the folder element
         return folder
@@ -75,6 +78,8 @@ class DistinguishedFolder(Folder):
         folder = etree.Element("{%s}DistinguishedFolderId" % TNS, Id=self.folder_id)
 
         # add mailbox reference
+        # Mailbox element is valid child of DistinguishedFolderId
+        #    XML element
         if self.mailbox.group is None:
             folder.append(self.mailbox.ToXML())
         else:

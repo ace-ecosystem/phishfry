@@ -12,11 +12,14 @@ class Message():
         # create item element
         item = etree.Element("{%s}ItemId" % TNS, Id=self.item_id)
 
-        # add mailbox reference
-        if self.mailbox.group is None:
-            item.append(self.mailbox.ToXML())
-        else:
-            item.append(self.mailbox.group.ToXML())
+        # Don't add 'Mailbox' element as it is not a valid child element
+        #    of the ItemId XML element.
+
+        # # add mailbox reference
+        # if self.mailbox.group is None:
+        #     item.append(self.mailbox.ToXML())
+        # else:
+        #     item.append(self.mailbox.group.ToXML())
 
         # return the item element
         return item
