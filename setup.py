@@ -10,7 +10,7 @@ def read(file_name):
 
 setup(
     name='phishfry',
-    version="1.0.0",
+    version="1.0.1",
     author='Cole Robinette',
     author_email='robinette.31@gmail.com',
     description='Python library and command line tool for removing/restoring emails in office365/Exchange using EWS API',
@@ -21,5 +21,5 @@ setup(
     packages=['phishfry'],
     python_requires=">=2.7",
     zip_safe=False,
-    url='https://github.com/IntegralDefense/phishfry',
+    url='https://github.com/ace-ecosystem/phishfry',
 )
